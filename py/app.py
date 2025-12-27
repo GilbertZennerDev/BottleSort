@@ -1,26 +1,10 @@
-"""
-dIdee ass fir den Magic Sort no ze programmeiren
-et gett folgendes ze maan:
-
-mir hun 3+ Flaeschen mat verschiddene Faarwen
-dZill ass pro Flesch eng Faarb oder ganz eidel
-
-if the top is x, then just replace x
-the top must be x to allow flushing
-
-cases:
-
-g x -> x x -> x b
-b x    b g    x g
-
-Ech hun dLogik agebaut kritt!! JUCHUU!!
-"""
-
 import sys
 
 def printBottles(bottles):
-	print(bottles[0][0], bottles[1][0], bottles[2][0])
-	print(bottles[0][1], bottles[1][1], bottles[2][1])
+	for y in range(len(bottles[0])):
+		for x in range(len(bottles)):
+			print(bottles[x][y], end=' ')
+		print()
 	
 def getFirstNotX(bottle):
 	for i, c in enumerate(bottle):
@@ -44,40 +28,68 @@ def checkBottlesComplete(bottles):
 		if not checkComplete(bottles, i): return False
 	print("All Complete. GAME WON!"); return True
 
-def flushBottle(bottles, indexStart, indexEnd):
+def flush_bottle(bottles, indexStart, indexEnd):
+	old_bottles = bottles
+	check = lambda x, bottles: x < 0 or x >= len(bottles)
+	if check(indexStart, old_bottles) or check(indexEnd, old_bottles): return old_bottles
 	# we flush from indexStart to indexEnd
 	# in indexStart we remove the firstNotX from indexStart, then replace the last X in indexEnd
 	startBottle = bottles[indexStart]
 	firstNotX = getFirstNotX(startBottle)
 	lastX = getLastX(bottles[indexEnd])
-	if lastX == -1: print("Error: Bottle full"); return
-	if firstNotX == -1: print("Error: Bottle is empty"); return
+	if lastX == -1: print("Error: Bottle full"); return old_bottles
+	if firstNotX == -1: print("Error: Bottle is empty"); return old_bottles
 	
 	box = startBottle[firstNotX]
 	bottles[indexStart][firstNotX] = 'x'
 	bottles[indexEnd][lastX] = box
-	print(bottles)
+	printBottles(bottles)
 	return bottles
 	
+def load_level(levelname, folder="levels/"):
+	try:
+		content = open(folder + levelname + ".lvl", 'r').read().splitlines()
+		size = len(content[0].split())
+		bottles = [line.split() for line in content]
+		printBottles(bottles)
+		return bottles
+	except Exception as e:
+		print(e); return []
+
+#each line is one bottle, so loop across the bottles
+def save_level(levelname, bottles):
+	try:
+		content = "\n".join([" ".join(bottle) for bottle in bottles])
+		open("saves/" + levelname + ".lvl", 'w').write(content)
+		print("Level Saved")
+	except Exception as e:
+		print(e); exit()
+
 def userInterface(bottles):
+	cmds = "s - show bottles, f x y - flush from x to y, c - check all bottles complete, l x - load level x, save - saveLevel, ls - load savedLevel, h - toggle commands, x - exit.\n"
+	show_commands = True
 	while 1:
-		u = input("s - show bottles, f x y - flush from x to y, c - check all bottles complete, x - exit.\n")
+		txt = ""
+		if show_commands: txt = cmds
+		u = input(txt)
 		if u == 'x': exit()
-		if u == 's': print(bottles)
+		if u == 's' and len(bottles): printBottles(bottles)
 		if u == 'c': checkBottlesComplete(bottles)
+		if u == 'h': show_commands = not show_commands
 		u = u.split(' ')
-		if u[0] == 'f':
-			bottles = flushBottle(bottles, int(u[1]), int(u[2]))		
+		if u[0] == 'f' and len(u) == 3 and len(bottles) and u[1] != u[2]:
+			bottles = flush_bottle(bottles, int(u[1]), int(u[2]))
+		if u[0] == 'l' and len(u) == 2:
+			bottles = load_level(u[1])
+		if u[0] == 'ls' and len(u) == 2:
+			bottles = load_level(u[1], "saves/")
+		if u[0] == 'save': save_level(u[1], bottles)
 
 def	main():
 	av = sys.argv
 	ac = len(av)
 	print("Welcome to Bottle Sort")
-	bottles = [
-	['g', 'g', 'b'],
-	['b', 'b', 'g'],
-	['x', 'x', 'x'],
-	]
+	bottles = load_level("1")
 	userInterface(bottles)
 
 if __name__ == '__main__': main()
