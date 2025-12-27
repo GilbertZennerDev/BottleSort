@@ -63,9 +63,10 @@ def save_level(levelname, bottles):
 		open("saves/" + levelname + ".lvl", 'w').write(content)
 		print("Level Saved")
 	except Exception as e:
-		print(e); exit()
+		print(e);
 
-def userInterface(bottles):
+def userInterface():
+	bottles = load_level("1")
 	cmds = "s - show bottles, f x y - flush from x to y, c - check all bottles complete, l x - load level x, save - saveLevel, ls - load savedLevel, h - toggle commands, x - exit.\n"
 	show_commands = True
 	while 1:
@@ -89,7 +90,6 @@ def	main():
 	av = sys.argv
 	ac = len(av)
 	print("Welcome to Bottle Sort")
-	bottles = load_level("1")
-	userInterface(bottles)
+	userInterface()
 
 if __name__ == '__main__': main()
