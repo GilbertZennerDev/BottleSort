@@ -19,7 +19,7 @@ def getLastX(bottle):
 def checkComplete(bottles, index):
 	bottle = bottles[index]
 	box = bottle[0]
-	for i, b in enumerate(bottle):
+	for b in bottle:
 		if b != box and box != 'x': print("Not Complete"); return False
 	print("Complete"); return True
 	

@@ -7,54 +7,183 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sstream>
+#include <fstream>
 using namespace std;
 
-/*
-def userInterface(bottles):
-	cmds = "s - show bottles, f x y - flush from x to y, c - check all bottles complete, l x - load level x, save - saveLevel, ls - load savedLevel, h - toggle commands, x - exit.\n"
-	show_commands = True
-	while 1:
-		txt = ""
-		if show_commands: txt = cmds
-		u = input(txt)
-		if u == 'x': exit()
-		if u == 's' and len(bottles): printBottles(bottles)
-		if u == 'c': checkBottlesComplete(bottles)
-		if u == 'h': show_commands = not show_commands
-		u = u.split(' ')
-		if u[0] == 'f' and len(u) == 3 and len(bottles) and u[1] != u[2]:
-			bottles = flush_bottle(bottles, int(u[1]), int(u[2]))
-		if u[0] == 'l' and len(u) == 2:
-			bottles = load_level(u[1])
-		if u[0] == 'ls' and len(u) == 2:
-			bottles = load_level(u[1], "saves/")
-		if u[0] == 'save': save_level(u[1], bottles)
-*/
+void printBottles(vector<string> bottles)
+{
+	int y, x;
 
-/*
-def	main():
-	av = sys.argv
-	ac = len(av)
-	print("Welcome to Bottle Sort")
-	bottles = load_level("1")
-	userInterface(bottles)
-*/
+	y = -1;
+	while (++y < bottles[0].size())
+	{
+		x = -1;
+		while (++x < bottles.size())
+			cout << bottles[x][y] << " ";
+		cout << "\n";
+	}
+}
+
+int getFirstNotX(string bottle)
+{
+	int i;
+
+	i = -1;
+	while (++i < bottle.size())
+		if (bottle[i] != 'x') return (i);
+	return (-1);
+}
+
+int getLastX(string bottle)
+{
+	int i;
+
+	i = -1;
+	while (++i < bottle.size())
+		if (bottle[i] != 'x') return (i - 1);
+	return (bottle.size() - 1);
+}
+
+bool checkComplete(string bottle)
+{
+	unsigned int i;
+	char box;
+
+	i = 0;
+	box = bottle[0];
+	while (++i < bottle.size())
+		if (bottle[i] != box && box != 'x')
+		{
+			cout << "Not Complete\n." << bottle[i] << ". ." << box << ".\n";
+			return (false);
+		}
+	cout << "Complete\n";
+	return (true);
+}
+
+bool checkBottlesComplete(vector<string> bottles)
+{
+	int i;
+
+	i = -1;
+	while (++i < bottles.size())
+		if (!checkComplete(bottles[i])) return (false);
+	cout << "All Complete. GAME WON!\n";
+	return (true);
+}
+
+bool check(unsigned int x, vector<string> bottles)
+{
+	return (x < 0 || x >= bottles.size());
+}
+
+void flush_bottle(vector<string> *bottles, unsigned int indexStart, unsigned int indexEnd)
+{
+	char box;
+	int lastX;
+	int firstNotX;
+	string startBottle;	
+
+	if (check(indexStart, *bottles) || check(indexEnd, *bottles)) return ;
+	//# we flush from indexStart to indexEnd
+	//# in indexStart we remove the firstNotX from indexStart, then replace the last X in indexEnd
+	startBottle = (*bottles)[indexStart];
+	firstNotX = getFirstNotX(startBottle);
+	lastX = getLastX((*bottles)[indexEnd]);
+	if (lastX == -1){cout << "Error: Bottle full\n"; return ;}
+	if (firstNotX == -1){cout << "Error: Bottle is empty\n"; return ;}
+	box = startBottle[firstNotX];
+	(*bottles)[indexStart][firstNotX] = 'x';
+	(*bottles)[indexEnd][lastX] = box;
+	printBottles(*bottles);
+	return ;
+}
+
+void load_level(vector<string> *bottles, string levelname, string foldername="levels/")
+{
+	stringstream	ss;
+	string		line;
+	string		bottle;
+
+	fstream f(foldername + levelname + ".lvl");
+	if (!f.is_open()) {
+        cerr << "Error opening the file!";
+        return ;
+   	}
+   	(*bottles).clear();
+	while (getline(f, line))
+	{
+		ss.clear();
+		ss << line;
+		bottle.clear();
+		while(getline(ss, line, ' '))
+			bottle.push_back(line[0]);
+		(*bottles).push_back(bottle);
+	}
+	f.close();
+	return ;
+}
+
+void	save_level(string levelname, vector<string> bottles)
+{
+	int	i;
+	int	j;
+	string	line;
+
+	ofstream f("saves/" + levelname + ".lvl");
+	if (!f.is_open()) {
+        cerr << "Error opening the file!";
+        return ;
+   	}
+	//ech muss just all string an bottles an f saven.
+	i = -1;
+	while (++i < bottles.size())
+	{
+		j = -1;
+		line.clear();
+		while (++j < bottles[i].size())
+		{
+			line.push_back(bottles[i][j]);
+			line.push_back(' ');
+		}
+		f << line + "\n";
+	}
+	f.close();
+}
 
 void userInterface()
 {
-	vector<vector<char>> bottles;
-	string cmds, txt, u;
+	stringstream ss;
+	vector<string> u2;
+	string cmds, u, t;
 	bool show_commands;
-
-	cmds = "s - show bottles, f x y - flush from x to y, c - check all bottles complete, l x - load level x, save - saveLevel, ls - load savedLevel, h - toggle commands, x - exit.\n";
+	vector<string> bottles;
+	
+	load_level(&bottles, "1");
+	cmds = string("s - show bottles, f x y - flush from x to y, c - check all bottles complete, l x - load level x, save - saveLevel, ls - load savedLevel, h - toggle commands, x - exit.\n");
 	show_commands = true;
 	while (1)
 	{
-		txt.clear();
-		if (show_commands) txt = cmds;
-		cout << txt;
-		cin >> u;
-		cout << "debug u:" << u << "\n";
+		u.clear();
+		if (show_commands) cout << cmds;
+		getline(cin, u);
+		if (u == string("x")) exit(1);
+		if (u == string("s") && bottles.size()) printBottles(bottles);
+		if (u == string("c")) checkBottlesComplete(bottles);
+		if (u == string("h")) show_commands = !show_commands;
+		ss.clear();
+		ss << u;
+		u2.clear();
+		while(getline(ss, t, ' '))
+			u2.push_back(t);
+		if (u2[0] == string("f") && u2.size() == 3 && bottles.size() && u2[1] != u2[2])
+			flush_bottle(&bottles, atoi(u2[1].c_str()), atoi(u2[2].c_str()));
+		if (u2[0] == string("l") && u2.size() == 2)
+			load_level(&bottles, u2[1]);
+		if (u2[0] == string("ls") && u2.size() == 2)
+			load_level(&bottles, u2[1], "saves/");
+		if (u2[0] == string("save")) save_level(u2[1], bottles);
 	}
 }
 
