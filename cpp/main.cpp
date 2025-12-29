@@ -5,7 +5,7 @@
 #include <iostream>
 using namespace std;
 
-void printBottles(vector<string> bottles)
+void printBottles(const vector<string>& bottles)
 {
 	int y, x;
 
@@ -56,7 +56,7 @@ bool checkComplete(string bottle)
 	return (true);
 }
 
-bool checkBottlesComplete(vector<string> bottles)
+bool checkBottlesComplete(const vector<string>& bottles)
 {
 	int i;
 
@@ -67,7 +67,7 @@ bool checkBottlesComplete(vector<string> bottles)
 	return (true);
 }
 
-bool check(unsigned int x, vector<string> bottles)
+bool check(unsigned int x, const vector<string>& bottles)
 {
 	return (x < 0 || x >= bottles.size());
 }
@@ -94,7 +94,7 @@ void flush_bottle(vector<string> *bottles, unsigned int indexStart, unsigned int
 	return ;
 }
 
-bool	check_level_valid(vector<string> bottles)
+bool	check_level_valid(const vector<string>& bottles)
 {
 //	#simple: we check all bottles have same length and length > 0
 //	#also at least 2 bottles are needed
@@ -139,7 +139,7 @@ void load_level(vector<string> *bottles, string levelname, string foldername="le
 	return ;
 }
 
-void	save_level(string levelname, vector<string> bottles)
+void	save_level(string levelname, const vector<string>& bottles)
 {
 	int	i;
 	int	j;
