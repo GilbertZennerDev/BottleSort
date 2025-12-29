@@ -45,12 +45,22 @@ def flush_bottle(bottles, indexStart, indexEnd):
 	bottles[indexEnd][lastX] = box
 	printBottles(bottles)
 	return bottles
-	
+
+def check_level_valid(bottles):
+	#simple: we check all bottles have same length and length > 0
+	#also at least 2 bottles are needed
+	if len(bottles) < 2: return False
+	size = len(bottles[0])
+	for bottle in bottles:
+		if len(bottle) != size: return False
+	return True
+
 def load_level(levelname, folder="levels/"):
 	try:
 		content = open(folder + levelname + ".lvl", 'r').read().splitlines()
 		size = len(content[0].split())
 		bottles = [line.split() for line in content]
+		if not check_level_valid(bottles): print("Error: Level invalid"); return []
 		printBottles(bottles)
 		return bottles
 	except Exception as e:

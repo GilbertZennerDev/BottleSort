@@ -1,14 +1,8 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <string.h>
-#include <sys/wait.h>
 #include <string>
-#include <iostream>
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <iostream>
 using namespace std;
 
 void printBottles(vector<string> bottles)
@@ -100,6 +94,21 @@ void flush_bottle(vector<string> *bottles, unsigned int indexStart, unsigned int
 	return ;
 }
 
+bool	check_level_valid(vector<string> bottles)
+{
+//	#simple: we check all bottles have same length and length > 0
+//	#also at least 2 bottles are needed
+	int		i;
+	unsigned int	size;
+
+	if (bottles.size() < 2) return (false);
+	size = bottles[0].size();
+	i = -1;
+	while (++i < bottles.size())
+		if (bottles[i].size() != size) return (false);
+	return (true);
+}
+
 void load_level(vector<string> *bottles, string levelname, string foldername="levels/")
 {
 	stringstream	ss;
@@ -120,6 +129,11 @@ void load_level(vector<string> *bottles, string levelname, string foldername="le
 		while(getline(ss, line, ' '))
 			bottle.push_back(line[0]);
 		(*bottles).push_back(bottle);
+	}
+	if (!check_level_valid(*bottles))
+	{
+		(*bottles).clear();
+		cout << "Error: Level invalid.\n";
 	}
 	f.close();
 	return ;
@@ -154,24 +168,28 @@ void	save_level(string levelname, vector<string> bottles)
 
 void userInterface()
 {
+	string u;
+	string t;
+	string cmds;
+	bool show_cmds;
 	stringstream ss;
 	vector<string> u2;
-	string cmds, u, t;
-	bool show_commands;
 	vector<string> bottles;
-	
+
+	show_cmds = true;
 	load_level(&bottles, "1");
 	cmds = string("s - show bottles, f x y - flush from x to y, c - check all bottles complete, l x - load level x, save - saveLevel, ls - load savedLevel, h - toggle commands, x - exit.\n");
-	show_commands = true;
+	
+	cout << "Welcome to Bottle Sort\n";
 	while (1)
 	{
 		u.clear();
-		if (show_commands) cout << cmds;
+		if (show_cmds) cout << cmds;
 		getline(cin, u);
 		if (u == string("x")) exit(1);
 		if (u == string("s") && bottles.size()) printBottles(bottles);
 		if (u == string("c")) checkBottlesComplete(bottles);
-		if (u == string("h")) show_commands = !show_commands;
+		if (u == string("h")) show_cmds = !show_cmds;
 		ss.clear();
 		ss << u;
 		u2.clear();
@@ -189,7 +207,6 @@ void userInterface()
 
 int	main(int ac, char **av)
 {
-	cout << "Welcome to Bottle Sort\n";
 	userInterface();
 	return (0);
 }
