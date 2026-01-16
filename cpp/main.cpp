@@ -72,25 +72,25 @@ bool check(unsigned int x, const vector<string>& bottles)
 	return (x < 0 || x >= bottles.size());
 }
 
-void flush_bottle(vector<string> *bottles, unsigned int indexStart, unsigned int indexEnd)
+void flush_bottle(vector<string> &bottles, unsigned int indexStart, unsigned int indexEnd)
 {
 	char box;
 	int lastX;
 	int firstNotX;
 	string startBottle;	
 
-	if (check(indexStart, *bottles) || check(indexEnd, *bottles)) return ;
+	if (check(indexStart, bottles) || check(indexEnd, bottles)) return ;
 	//# we flush from indexStart to indexEnd
 	//# in indexStart we remove the firstNotX from indexStart, then replace the last X in indexEnd
-	startBottle = (*bottles)[indexStart];
+	startBottle = bottles[indexStart];
 	firstNotX = getFirstNotX(startBottle);
-	lastX = getLastX((*bottles)[indexEnd]);
+	lastX = getLastX(bottles[indexEnd]);
 	if (lastX == -1){cout << "Error: Bottle full\n"; return ;}
 	if (firstNotX == -1){cout << "Error: Bottle is empty\n"; return ;}
 	box = startBottle[firstNotX];
-	(*bottles)[indexStart][firstNotX] = 'x';
-	(*bottles)[indexEnd][lastX] = box;
-	printBottles(*bottles);
+	bottles[indexStart][firstNotX] = 'x';
+	bottles[indexEnd][lastX] = box;
+	printBottles(bottles);
 	return ;
 }
 
@@ -109,7 +109,7 @@ bool	check_level_valid(const vector<string>& bottles)
 	return (true);
 }
 
-void load_level(vector<string> *bottles, string levelname, string foldername="levels/")
+void load_level(vector<string> &bottles, const string levelname, string foldername="levels/")
 {
 	stringstream	ss;
 	string		line;
@@ -120,7 +120,7 @@ void load_level(vector<string> *bottles, string levelname, string foldername="le
         cerr << "Error opening the file!";
         return ;
    	}
-   	(*bottles).clear();
+   	bottles.clear();
 	while (getline(f, line))
 	{
 		ss.clear();
@@ -128,18 +128,18 @@ void load_level(vector<string> *bottles, string levelname, string foldername="le
 		bottle.clear();
 		while(getline(ss, line, ' '))
 			bottle.push_back(line[0]);
-		(*bottles).push_back(bottle);
+		bottles.push_back(bottle);
 	}
-	if (!check_level_valid(*bottles))
+	if (!check_level_valid(bottles))
 	{
-		(*bottles).clear();
+		bottles.clear();
 		cout << "Error: Level invalid.\n";
 	}
 	f.close();
 	return ;
 }
 
-void	save_level(string levelname, const vector<string>& bottles)
+void	save_level(const string levelname, const vector<string> &bottles)
 {
 	int	i;
 	int	j;
@@ -150,7 +150,6 @@ void	save_level(string levelname, const vector<string>& bottles)
         cerr << "Error opening the file!";
         return ;
    	}
-	//ech muss just all string an bottles an f saven.
 	i = -1;
 	while (++i < bottles.size())
 	{
@@ -177,7 +176,7 @@ void userInterface()
 	vector<string> bottles;
 
 	show_cmds = true;
-	load_level(&bottles, "1");
+	load_level(bottles, "1");
 	cmds = string("s - show bottles, f x y - flush from x to y, c - check all bottles complete, l x - load level x, save - saveLevel, ls - load savedLevel, h - toggle commands, x - exit.\n");
 	
 	cout << "Welcome to Bottle Sort\n";
@@ -196,11 +195,11 @@ void userInterface()
 		while(getline(ss, t, ' '))
 			u2.push_back(t);
 		if (u2[0] == string("f") && u2.size() == 3 && bottles.size() && u2[1] != u2[2])
-			flush_bottle(&bottles, atoi(u2[1].c_str()), atoi(u2[2].c_str()));
+			flush_bottle(bottles, atoi(u2[1].c_str()), atoi(u2[2].c_str()));
 		if (u2[0] == string("l") && u2.size() == 2)
-			load_level(&bottles, u2[1]);
+			load_level(bottles, u2[1]);
 		if (u2[0] == string("ls") && u2.size() == 2)
-			load_level(&bottles, u2[1], "saves/");
+			load_level(bottles, u2[1], "saves/");
 		if (u2[0] == string("save")) save_level(u2[1], bottles);
 	}
 }
