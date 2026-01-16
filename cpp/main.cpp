@@ -186,7 +186,7 @@ void userInterface()
 		u.clear();
 		if (show_cmds) cout << cmds;
 		getline(cin, u);
-		if (u == string("x")) exit(1);
+		if (u == string("x")) break;
 		if (u == string("s") && bottles.size()) printBottles(bottles);
 		if (u == string("c")) checkBottlesComplete(bottles);
 		if (u == string("h")) show_cmds = !show_cmds;
